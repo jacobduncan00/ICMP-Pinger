@@ -11,6 +11,7 @@ import binascii
 
 ICMP_ECHO_REQUEST = 8
 
+
 def checksum(string):
     # Creating the checksum of the packet
     string = bytearray(string)
@@ -33,6 +34,7 @@ def checksum(string):
     result = result >> 8 | (result << 8 & 0xff00)
     return result
 
+
 def receiveOnePing(tempSocket, ID, timeout, dAddress):
     global rtt_min, rtt_max, rtt_sum, rtt_cnt
     # Being able to recieve the ping
@@ -49,7 +51,8 @@ def receiveOnePing(tempSocket, ID, timeout, dAddress):
         recPacket, addr = tempSocket.recvfrom(1024)
 
         icmpHeader = recPacket[20:28]
-        icmpType, code, tempCheck, packetID, sequence = struct.unpack("bbHHh", icmpHeader)
+        icmpType, code, tempCheck, packetID, sequence = struct.unpack(
+            "bbHHh", icmpHeader)
 
         if type != 8 and packetID == ID:
             bytesIn = struct.calcsize("d")
@@ -64,6 +67,7 @@ def receiveOnePing(tempSocket, ID, timeout, dAddress):
         remaining = remaining - timeIn
         if remaining <= 0:
             return "Request has timed out"
+
 
 def sendOnePing(tempSocket, dAddress, ID):
     # Being able to send the ping
@@ -80,13 +84,14 @@ def sendOnePing(tempSocket, dAddress, ID):
 
     header = struct.pack("bbHHh", ICMP_ECHO_REQUEST, 0, tempCheck, ID, 1)
     packet = header + data
-    tempSocket.sendto(packet, (dAddress, 1)) 
+    tempSocket.sendto(packet, (dAddress, 1))
+
 
 def doOnePing(dAddress, timeout):
     # Sends out a single ping
     icmp = getprotobyname("icmp")
-    #Creating Socket here
-    tempSocket = socket(AF_INET, SOCK_DGRAM, icmp) 
+    # Creating Socket here
+    tempSocket = socket(AF_INET, SOCK_DGRAM, icmp)
     # Returns the current process of ID
     myID = os.getpid() & 0xFFFF
     # Sends one ping to the destination address
@@ -99,9 +104,11 @@ def doOnePing(dAddress, timeout):
 
 # Set timeout to 1 second, if response
 # not given in 1 second, then timeout
+
+
 def ping(host, timeout=1):
 
-    # Global variables used to 
+    # Global variables used to
     # calculate min,max,avg packet
     # timings
 
@@ -115,8 +122,8 @@ def ping(host, timeout=1):
     # Set destination to be the parameter "host" passed into
     # the function
     dest = gethostbyname(host)
-    print ("Pinging " + dest + ":")
-    print ("")
+    print("Pinging " + dest + ":")
+    print("")
     arr = []
 
     while cnt < 10:
@@ -125,7 +132,7 @@ def ping(host, timeout=1):
         time.sleep(1)
 
     if cnt != 0:
-        print(" ")
+        print("")
         print("*** ", host, " ping stats ***")
         print("Packets transmitted  :", cnt)
         print("Packets received     :", rtt_cnt)
@@ -135,24 +142,38 @@ def ping(host, timeout=1):
         print("Max RTT: ", format(max(arr), ".5f"), "seconds")
         print("Avg RTT: ", format(sum(arr)/10, ".5f"), "seconds")
 
+
 def main():
+    print("0. Ping custom IP address")
     print("1. Ping localhost")
-    print("2. Ping Google")
-    print("3. Ping Cloudflare")
-    print(" ")
+    print("2. Ping United Kingdom")
+    print("3. Ping Mexico")
+    print("4. Ping Canada")
+    print("5. Ping United States")
     choice = int(input("Enter a number: "))
     print(" ")
-    if choice == 1:
+    if choice == 0:
+        ip = raw_input("Enter IP Address you want to ping: ")
+        print("Pinging " + ip + " 10 times!")
+        ping(ip)
+    elif choice == 1:
         print("Pining localhost 10 times!")
         ping("127.0.0.1")
     elif choice == 2:
-        print("Pinging Google 10 times!")
-        ping("8.8.8.8")
+        print("Pinging United Kingdom 10 times!")
+        ping("104.102.231.197")
     elif choice == 3:
-        print("Pinging Cloudflare 10 times!")
-        ping("1.1.1.1")
+        print("Pinging Mexico 10 times!")
+        ping("23.3.122.214")
+    elif choice == 4:
+        print("Pinging Canada 10 times!")
+        ping("23.3.126.101")
+    elif choice == 5:
+        print("Pinging United States 10 times!")
+        ping("176.32.98.166")
     else:
         print("Not a valid choice!")
+
 
 if __name__ == "__main__":
     main()
